@@ -145,6 +145,9 @@ void preemptiveSJF(process pro[], int processCount){
 	// The way this scheduler works uses a temporary vector that is sorted by execution time every time the current time of the scheduler
 	//	is increased. The values are added to the temp vector as they arrive, and once each process is done executing, it is removed from the 
 	//	temp vector and added to the final vector with the docmented start time and completion time for output. 
+	//
+	// The only value that is docked remaining burst time each runthrough is the first value in the temp vector, 
+	//	because that is the only current running process, as only one process can be executed at a time.
 	
 	while(usedTime <= totalTime + firstArrival){
 		//Sorts by arrival
