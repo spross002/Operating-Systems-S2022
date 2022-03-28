@@ -50,6 +50,8 @@ void nonpreFCFS(process pro[], int processCount){
 	int totalTime = 0;
 	int firstArrival = 100;
 
+	//This loop finds the first time of process arrival
+	// This is in order to account for beginning runtime without processes arriving.
 	for(int i = 0; i < processCount; i++){
 		if(pro[i].arrivalTime < firstArrival){
 			firstArrival = pro[i].arrivalTime;
@@ -110,27 +112,40 @@ void preemptiveSJF(process pro[], int processCount){
 	//Sorts by arrival
 	sort(pro, pro+processCount, compArrival);
 
+	
 	for(int i = 0; i < processCount; i++){
+		//Adds the execution times in order to pre-determine the time the scheduler will need.
 		totalTime += pro[i].executionTime;
 
+		//Sets the start times to -1 for each process
+		//This is used in order to determine whether a process has started execution at least once
 		pro[i].startTime = -1;
 
+		//Finds the largest arrival time
 		if(pro[i].arrivalTime > maxArrival){
 			maxArrival = pro[i].arrivalTime;
 		}
 
+		//Documents the time of the first process to arrive
 		if(pro[i].arrivalTime < firstArrival){
 			firstArrival = pro[i].arrivalTime;
 		}
 
+		//Sets the bool value in the process struct in order to determine if
+		// the process is in the temp sorting vector for SJF.
 		pro[i].isInVect = false;
 
+		//Sets the remaining burst time to execution time to prep for SJF
 		pro[i].burstRemaining = pro[i].executionTime;
 	}
 
 	//Scheduler Code
 	//----------------------------------------------------------------
 
+	// The way this scheduler works uses a temporary vector that is sorted by execution time every time the current time of the scheduler
+	//	is increased. The values are added to the temp vector as they arrive, and once each process is done executing, it is removed from the 
+	//	temp vector and added to the final vector with the docmented start time and completion time for output. 
+	
 	while(usedTime <= totalTime + firstArrival){
 		//Sorts by arrival
 		sort(pro, pro+processCount, compArrival);
@@ -140,7 +155,7 @@ void preemptiveSJF(process pro[], int processCount){
 			usedTime = firstArrival;
 		}
 
-		//Adds to the process vector on arrival
+		//Adds to the process vector on  each process arrival
 		for(int i = 0; i < processCount; i++){
 			if(pro[numInVect].arrivalTime <= maxArrival && pro[numInVect].arrivalTime == usedTime){
 				if(pro[numInVect].isInVect == false){
@@ -155,7 +170,7 @@ void preemptiveSJF(process pro[], int processCount){
 		//Sorts process vector by execution time every tick
 		sort(temp.begin(), temp.end(), compExecution);
 		
-		//If execution time left is 0, removes from temp vector and adds to final vector
+		//If remaining burst time (execution time) is 0, removes from temp vector and adds to final vector
 		if(temp[0].burstRemaining == 0){
 			temp[0].stopTime = usedTime;
 			temp[0].turnaroundTime = temp[0].stopTime - temp[0].arrivalTime;
@@ -163,7 +178,7 @@ void preemptiveSJF(process pro[], int processCount){
 			temp.erase(temp.begin());
 		}
 
-		//If process hasn't started yet, it sets the start time to current runtime
+		//If process at the front of temp hasn't started yet, it sets the process start time to current runtime
 		if(temp[0].startTime == -1){
 			temp[0].startTime = usedTime;
 			temp[0].burstRemaining--;
